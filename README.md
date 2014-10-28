@@ -38,6 +38,18 @@ views/
   * Inherited templates must use dashes ("-")
   * File extensions  should be all the same (html, tmpl, ...)
   * Child template must be located in same folder as parent
+
+### Config
+
+You can overwrite the default parse options by creating a new ParseOptions struct. Example:
+
+```go
+// There also exists a DefaultParseOptions struct (see "As code" section below)
+pOpt = &atempgo.ParseOptions{
+	BaseName: "layout",	// default: "base"
+    Ext: "tmpl",		// default "html"
+}
+```
   
 ### As code
 
