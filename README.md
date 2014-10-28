@@ -1,7 +1,7 @@
 Atempgo
 ==============
 
-Atempgo is an **A**utomatic **tem**plate **p**arser for **go**. 
+Atempgo is an Automatic TEMplate Parser for GO. 
 
 ## Install
 
