@@ -37,7 +37,7 @@ views/
   * base.html must be located in the root
   * Inherited templates must use dashes ("-")
   * File extensions  should be all the same (html, tmpl, ...)
-  * Child template must be in same folder as parent
+  * Child template must be located in same folder as parent
   
 ### As code
 
