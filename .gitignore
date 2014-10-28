@@ -71,3 +71,4 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.sublime-*
+*_dev.go

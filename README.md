@@ -24,7 +24,10 @@ views/
 ├── SplashSite/
 │   ├── index.html
 │   ├── index-login.html
-|   └── index-login-special.html
+|   ├── index-login-special.html
+|   └── SubSplashFolder/
+|       ├── start.html
+|       └── start-special.html
 |
 └── base.html
 ```
@@ -34,18 +37,19 @@ views/
   * base.html must be located in the root
   * Inherited templates must use dashes ("-")
   * File extensions  should be all the same (html, tmpl, ...)
-  * **SPECIAL NOTE:** It only supports a subfolder depth of one at the moment
+  * Child template must be in same folder as parent
   
 ### As code
 
 ```go
 import (
 	"github.com/pvormste/atempgo"
+    "path/filepath"
 )
 
 func init() {
-	// Parameters: Path to base file, Name of base file, template extensions
-	atempgo.LoadTemplates("path/to/folde/with/basefile/", "base", "tmpl")
+	// Parameters: Path to base file (e.g. path/to/folder/with/basefile), parse options (e.g. DefaultParseOptions)
+	atempgo.LoadTemplates(filepath.Join("path", "to", "folder", "with", "basefile"), atempgo.DefaultParseOptions)
 }
 ```
 
@@ -60,15 +64,14 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("index->login").ExecuteTemplate(w, "base", nil)
+	atempgo.GetTemplate("index.login").ExecuteTemplate(w, "base", nil)
 }
 
 func HandleSpecialLogin(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("login->special").ExecuteTemplate(w, "base", nil)
+	atempgo.GetTemplate("login.special").ExecuteTemplate(w, "base", nil)
 }
 ```
 
 ## Roadmap
 
   * Code is not optimized. Just was an idea if it works. Maybe someone can rethink about it.
-  * Support of "unlimited" subfolder depth

@@ -3,11 +3,19 @@
 package atempgo
 
 import (
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+type ParseOptions struct {
+	BasePath string
+	BaseName string
+	Ext      string
+}
 
 // This map contains all templates
 var templates map[string]*template.Template
@@ -19,17 +27,12 @@ var templates map[string]*template.Template
 // Every template inherits from a base template.
 // So: index.html will inherit from base.html
 // index-login.html inherits from index.html and so on.
-// The templates can be called by templates["index"] or templates["index->login"]
-func checkDir(dir string, relPathViews string, baseViewName string, ext string) {
+// The templates can be called by templates["index"] or templates["index.login"]
+func checkDir(relativePath string, pOpt *ParseOptions) {
 	var files []os.FileInfo
 	var err error
 
-	// Read all files and dirs from the actual folder
-	if dir != "" {
-		files, err = ioutil.ReadDir(relPathViews + "/" + dir)
-	} else {
-		files, err = ioutil.ReadDir(relPathViews)
-	}
+	files, err = ioutil.ReadDir(relativePath)
 
 	// If there is an error: PANIC!
 	if err != nil {
@@ -61,24 +64,23 @@ func checkDir(dir string, relPathViews string, baseViewName string, ext string) 
 					}
 				}
 
-				rebuildTmpl[i] = createPathToView(dir, relPathViews, parent, true, ext)
+				rebuildTmpl[i] = createPathToView(relativePath, parent, true, pOpt)
 			}
 
 			// Saving the templates like e.g.:
 			// index.html inherits from base.html: templates["index"]
-			// index-login.html inherits from index.html ...: templates["index->login"]
-			// index-login-special.html inherits from index-login.html ...: templates["login->special"]
-			templates[partialTmpl[len(partialTmpl)-2]+"->"+partialTmpl[len(partialTmpl)-1]] = createInheritedTemplate(createPathToView("", relPathViews, baseViewName, true, ext), rebuildTmpl...)
+			// index-login.html inherits from index.html ...: templates["index.login"]
+			// index-login-special.html inherits from index-login.html ...: templates["login.special"]
+			templates[partialTmpl[len(partialTmpl)-2]+"."+partialTmpl[len(partialTmpl)-1]] = createInheritedTemplate(createPathToView(pOpt.BasePath, pOpt.BaseName, true, pOpt), rebuildTmpl...)
 		} else if !file.IsDir() {
 			// Add template with inheritance
-			if filename != baseViewName {
-				templates[filename] = createInheritedTemplate(createPathToView("", relPathViews, baseViewName, true, ext), createPathToView(dir, relPathViews, file.Name(), false, ""))
+			if filename != pOpt.BaseName {
+				templates[filename] = createInheritedTemplate(createPathToView(pOpt.BasePath, pOpt.BaseName, true, pOpt), createPathToView(relativePath, file.Name(), false, pOpt))
 			}
 
 		} else {
 			// Check subfolder the same way.
-			// NOTE: At the moment, there is only one subfolder supported
-			checkDir(file.Name(), relPathViews, baseViewName, ext)
+			checkDir(filepath.Join(relativePath, file.Name()), pOpt)
 		}
 
 	}
@@ -97,18 +99,13 @@ func createInheritedTemplate(base string, children ...string) *template.Template
 }
 
 // Creates full paths to the views
-// NOTE: Only supports one subfolder depth of one
-func createPathToView(dir string, relPathViews string, filename string, withExt bool, ext string) string {
+func createPathToView(relativePath string, filename string, withExt bool, pOpt *ParseOptions) string {
 	var fullpath string
 
-	if dir != "" {
-		fullpath = relPathViews + "/" + dir + "/" + filename
-	} else {
-		relPathViews + "/" + filename
-	}
+	fullpath = filepath.Join(relativePath, filename)
 
 	if withExt {
-		fullpath += "." + ext
+		fullpath += "." + pOpt.Ext
 	}
 
 	return fullpath
@@ -116,20 +113,26 @@ func createPathToView(dir string, relPathViews string, filename string, withExt 
 
 // ## Public
 
+// Default Options
+var DefaultParseOptions = &ParseOptions{BaseName: "base", Ext: "html"}
+
 // This function checks the view directory and parses the templates.
-// relPathViews: Relative path from exectuable to the view directory
+// relativePath: Relative path from exectuable to the view directory
 // baseViewName: How the base view file is named. Typically "base".
 // ext: Extension naming of the views. Typically "html" or "tmpl"
-func LoadTemplates(relPathViews string, baseViewName string, ext string) {
+func LoadTemplates(relativePath string, pOpt *ParseOptions) {
 	// Initializes the template map
 	templates = make(map[string]*template.Template)
 
+	// Save Path to Base file
+	pOpt.BasePath = relativePath
+
 	// Start checking the main dir of the views
-	checkDir("", relPathViews, baseViewName, ext)
+	checkDir(relativePath, pOpt)
 }
 
 // This function returns the actual template with key "name".
-// Naming is 'templates["singleInherited"]' or 'templates["multi->inherited"]'
+// Naming is 'templates["singleInherited"]' or 'templates["multi.inherited"]'
 func GetTemplate(name string) *template.Template {
 	return templates[name]
 }
