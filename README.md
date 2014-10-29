@@ -29,13 +29,18 @@ views/
 |       ├── start.html
 |       └── start-special.html
 |
+├── nonbase/
+│   ├── superspecial.html
+|   └── superspecial-content.html
+|
 └── base.html
 ```
 
 ### Note:
 
   * base.html must be located in the root
-  * Inherited templates must use dashes ("-")
+  * Views, which doesn't extend a base-view, must be located in specific folder (See ParseOptions)
+  * Inherited templates must use a delimiter specified in the ParseOptions (default "-")
   * File extensions  should be all the same (html, tmpl, ...)
   * Child template must be located in same folder as parent
 
@@ -46,9 +51,10 @@ You can overwrite the default parse options by creating a new ParseOptions struc
 ```go
 // There also exists a DefaultParseOptions struct (see "As code" section below)
 pOpt := &atempgo.ParseOptions{
-	BaseName: "layout",	// default: "base"
-	Delimiter: "+",		// default: "-"
-    Ext: "tmpl",		// default "html"
+	BaseName: "layout",			// default: "base"
+	Delimiter: "+",				// default: "-"
+    Ext: "tmpl",				// default: "html"
+    NonBaseFolder: "single",	// default: "nonbase"
 }
 ```
   
@@ -72,16 +78,28 @@ import (
 	"github.com/pvormste/atempgo"
 )
 
+// The Hash (#) means, that the view extends base view.
+// So "base" must be executed. 
 func HandleRoot(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("index").ExecuteTemplate(w, "base", nil)
+	atempgo.GetTemplate("#index").ExecuteTemplate(w, "base", nil)
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("index.login").ExecuteTemplate(w, "base", nil)
+	atempgo.GetTemplate("#index.login").ExecuteTemplate(w, "base", nil)
 }
 
 func HandleSpecialLogin(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("login.special").ExecuteTemplate(w, "base", nil)
+	atempgo.GetTemplate("#login.special").ExecuteTemplate(w, "base", nil)
+}
+
+// No Hash (#) indicates, that it doesn't extends the base view.
+// In this case, it must render the first named part of the key ("superspecial").
+func HandleSuperspecial(w http.ResponseWriter, r *http.Request) {
+	atempgo.GetTemplate("superspecial").ExecuteTemplate(w, "superspecial", nil)
+}
+
+func HandleSuperspecialWithContent(w http.ResponseWriter, r *http.Request) {
+	atempgo.GetTemplate("superspecial.content").ExecuteTemplate(w, "superspecial", nil)
 }
 ```
 
