@@ -12,9 +12,10 @@ import (
 )
 
 type ParseOptions struct {
-	BasePath string
-	BaseName string
-	Ext      string
+	BasePath  string
+	BaseName  string
+	Delimiter string
+	Ext       string
 }
 
 // This map contains all templates
@@ -47,7 +48,7 @@ func checkDir(relativePath string, pOpt *ParseOptions) {
 		// Check for inheritance marked by "-"
 		if strings.Contains(filename, "-") && !file.IsDir() {
 			// Split the filename
-			partialTmpl := strings.Split(filename, "-")
+			partialTmpl := strings.Split(filename, pOpt.Delimiter)
 			rebuildTmpl := make([]string, len(partialTmpl))
 
 			// Rename the strings correctly
@@ -60,7 +61,7 @@ func checkDir(relativePath string, pOpt *ParseOptions) {
 					if j == i {
 						parent += partialTmpl[j]
 					} else {
-						parent += partialTmpl[j] + "-"
+						parent += partialTmpl[j] + pOpt.Delimiter
 					}
 				}
 
@@ -114,7 +115,7 @@ func createPathToView(relativePath string, filename string, withExt bool, pOpt *
 // ## Public
 
 // Default Options
-var DefaultParseOptions = &ParseOptions{BaseName: "base", Ext: "html"}
+var DefaultParseOptions = &ParseOptions{BaseName: "base", Delimiter: "-", Ext: "html"}
 
 // This function checks the view directory and parses the templates.
 // relativePath: Relative path from exectuable to the view directory
@@ -126,6 +127,19 @@ func LoadTemplates(relativePath string, pOpt *ParseOptions) {
 
 	// Save Path to Base file
 	pOpt.BasePath = relativePath
+
+	// Check if every option is set
+	if pOpt.BaseName == "" {
+		pOpt.BaseName = DefaultParseOptions.BaseName
+	}
+
+	if pOpt.Delimiter == "" {
+		pOpt.Delimiter = DefaultParseOptions.Delimiter
+	}
+
+	if pOpt.Ext == "" {
+		pOpt.Ext = DefaultParseOptions.Ext
+	}
 
 	// Start checking the main dir of the views
 	checkDir(relativePath, pOpt)
