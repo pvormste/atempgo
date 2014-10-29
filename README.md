@@ -47,7 +47,7 @@ You can overwrite the default parse options by creating a new ParseOptions struc
 // There also exists a DefaultParseOptions struct (see "As code" section below)
 pOpt := &atempgo.ParseOptions{
 	BaseName: "layout",	// default: "base"
-	Delimiter: "+"		// default: "-"
+	Delimiter: "+",		// default: "-"
     Ext: "tmpl",		// default "html"
 }
 ```
