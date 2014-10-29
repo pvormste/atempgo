@@ -13,7 +13,7 @@ go get github.com/pvormste/atempgo
 ## Features
 
  * Automatically parses view templates
- * Simulates template inheritance
+ * Simulates template inheritance (as described at [StackOverflow](http://stackoverflow.com/questions/11467731/is-it-possible-to-have-nested-templates-in-go-using-the-standard-library-googl))
  * Generates easy keys for accessing the templates
 
 ## How does it work?
