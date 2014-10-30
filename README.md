@@ -18,16 +18,15 @@ go get github.com/pvormste/atempgo
 
 ## How does it work?
 
-### Structure
+### Structure (example)
 ```
 views/
 ├── SplashSite/
 │   ├── index.html
 │   ├── index-login.html
-|   ├── index-login-special.html
+|   ├── index-register.html
 |   └── SubSplashFolder/
-|       ├── start.html
-|       └── start-special.html
+|       └── start.html
 |
 ├── nonbase/
 │   ├── superspecial.html
@@ -43,6 +42,9 @@ views/
   * Inherited templates must use a delimiter specified in the ParseOptions (default "-")
   * File extensions  should be all the same (html, tmpl, ...)
   * Child template must be located in same folder as parent
+  * Hash (#) is short form of: extends base -> base.index.login is written as #index.login
+  * If key starts with Hash (#), you have to pass the BaseName value (default: base), else: the first parent
+  * Because of go template design, you can only call the last child, not a single parent (e.g. "#index.login" not "#index")
 
 ### Config
 
@@ -80,24 +82,16 @@ import (
 
 // The Hash (#) means, that the view extends base view.
 // So "base" must be executed. 
-func HandleRoot(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("#index").ExecuteTemplate(w, "base", nil)
-}
-
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	atempgo.GetTemplate("#index.login").ExecuteTemplate(w, "base", nil)
 }
 
-func HandleSpecialLogin(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("#login.special").ExecuteTemplate(w, "base", nil)
+func HandleRegister(w http.ResponseWriter, r *http.Request) {
+	atempgo.GetTemplate("#index.register").ExecuteTemplate(w, "base", nil)
 }
 
 // No Hash (#) indicates, that it doesn't extends the base view.
 // In this case, it must render the first named part of the key ("superspecial").
-func HandleSuperspecial(w http.ResponseWriter, r *http.Request) {
-	atempgo.GetTemplate("superspecial").ExecuteTemplate(w, "superspecial", nil)
-}
-
 func HandleSuperspecialWithContent(w http.ResponseWriter, r *http.Request) {
 	atempgo.GetTemplate("superspecial.content").ExecuteTemplate(w, "superspecial", nil)
 }
@@ -106,3 +100,4 @@ func HandleSuperspecialWithContent(w http.ResponseWriter, r *http.Request) {
 ## Roadmap
 
   * Code is not optimized. Just was an idea if it works. Maybe someone can rethink about it.
+  * Add support to call views by path

@@ -3,7 +3,6 @@
 package atempgo
 
 import (
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -49,9 +48,10 @@ func checkDir(relativePath string, pOpt *ParseOptions, isNonBase bool) {
 	for _, file := range files {
 		// Extract the filename without extension
 		filename := strings.Split(file.Name(), ".")[0]
+		hasChildren := checkIfHasChildren(pOpt, filename, files)
 
 		// Check for inheritance marked by "-"
-		if strings.Contains(filename, "-") && !file.IsDir() {
+		if strings.Contains(filename, "-") && !file.IsDir() && !hasChildren {
 			// Split the filename
 			partialTmpl := strings.Split(filename, pOpt.Delimiter)
 			rebuildTmpl := make([]string, len(partialTmpl))
@@ -86,7 +86,7 @@ func checkDir(relativePath string, pOpt *ParseOptions, isNonBase bool) {
 				templates[partialTmpl[0]+"."+partialTmpl[len(partialTmpl)-2]+"."+partialTmpl[len(partialTmpl)-1]] = createInheritedTemplate(pOpt, false, rebuildTmpl...)
 			}
 
-		} else if !file.IsDir() {
+		} else if !file.IsDir() && !hasChildren {
 			// Add template with inheritance
 			if filename != pOpt.BaseName {
 				if !isNonBase {
@@ -100,11 +100,10 @@ func checkDir(relativePath string, pOpt *ParseOptions, isNonBase bool) {
 			// Check if entering NonBase Folder
 			checkDir(filepath.Join(relativePath, file.Name()), pOpt, true)
 
-		} else {
+		} else if file.IsDir() {
 			// Check subfolder the same way.
 			checkDir(filepath.Join(relativePath, file.Name()), pOpt, isNonBase)
 		}
-
 	}
 }
 
@@ -135,6 +134,18 @@ func createPathToView(relativePath string, filename string, withExt bool, pOpt *
 	}
 
 	return fullpath
+}
+
+func checkIfHasChildren(pOpt *ParseOptions, filename string, files []os.FileInfo) bool {
+	child := filename + pOpt.Delimiter
+
+	for _, file := range files {
+		if strings.Contains(file.Name(), child) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // ## Public
