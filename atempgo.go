@@ -1,5 +1,5 @@
 // Copyright 2014 Patric "pvormste" Vormstein.
-// All rights reserved.
+// All rights reserved. See LICENCE.
 package atempgo
 
 import (
