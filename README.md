@@ -102,7 +102,7 @@ func HandleSuperspecialWithContent(w http.ResponseWriter, r *http.Request) {
   * Code is not optimized. Just was an idea if it works. Maybe someone can rethink about it.
   * Add support to call views by path
 
-## LICENCE (MIT)
+## LICENSE (MIT)
 
 The MIT License (MIT)
 
