@@ -5,6 +5,7 @@ package atempgo
 import (
 	"html/template"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,7 +52,7 @@ func checkDir(relativePath string, pOpt *ParseOptions, isNonBase bool) {
 		hasChildren := checkIfHasChildren(pOpt, filename, files)
 
 		// Check for inheritance marked by "-"
-		if strings.Contains(filename, "-") && !file.IsDir() && !hasChildren {
+		if strings.Contains(filename, pOpt.Delimiter) && !file.IsDir() && !hasChildren {
 			// Split the filename
 			partialTmpl := strings.Split(filename, pOpt.Delimiter)
 			rebuildTmpl := make([]string, len(partialTmpl))
@@ -136,6 +137,7 @@ func createPathToView(relativePath string, filename string, withExt bool, pOpt *
 	return fullpath
 }
 
+// This function checks, if the file has children
 func checkIfHasChildren(pOpt *ParseOptions, filename string, files []os.FileInfo) bool {
 	child := filename + pOpt.Delimiter
 
@@ -185,8 +187,15 @@ func LoadTemplates(relativePath string, pOpt *ParseOptions) {
 	checkDir(relativePath, pOpt, false)
 }
 
-// This function returns the actual template with key "name".
+// This function returns the actual template with key "key".
 // Naming is 'templates["#singleInherited"]' or 'templates["#multi.inherited"]'
-func GetTemplate(name string) *template.Template {
-	return templates[name]
+func GetTemplate(key string) *template.Template {
+	return templates[key]
+}
+
+// If you want to debug your used keys
+func GetTemplateDebug(key string) *template.Template {
+	log.Println("Getting template with key:", key)
+
+	return templates[key]
 }
